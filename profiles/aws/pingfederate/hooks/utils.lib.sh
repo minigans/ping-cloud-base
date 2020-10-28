@@ -231,18 +231,15 @@ function configure_tcp_xml() {
   local currentDir="$(pwd)"
   cd "${SERVER_ROOT_DIR}/server/default/conf"
 
+  query_list="${PF_CLUSTER_DOMAIN_NAME}"
   if is_multi_cluster; then
-    export S3_PING_PROTOCOL="<org.jgroups.aws.s3.NATIVE_S3_PING \
-        region_name=\"${PRIMARY_REGION}\" \
-        bucket_name=\"${CLUSTER_BUCKET_NAME}\" \
-        bucket_prefix=\"${PING_PRODUCT}\" \
-        remove_all_data_on_view_change=\"true\" \
-        write_data_on_find=\"true\" />"
+    for domain in ${SECONDARY_TENANT_DOMAINS}; do
+      query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}.${domain}"
+    done
   fi
 
-  export DNS_PING_PROTOCOL="<dns.DNS_PING dns_query=\"${PF_CLUSTER_DOMAIN_NAME}\" />"
-
-  envsubst '${S3_PING_PROTOCOL} ${DNS_PING_PROTOCOL}' \
+  export DNS_QUERY_LIST="${query_list}"
+  envsubst '${DNS_QUERY_LIST}' \
       < "${STAGING_DIR}/templates/tcp.xml" \
       > tcp.xml
 

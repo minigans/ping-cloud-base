@@ -23,9 +23,7 @@
 
             log_discard_msgs="false"/>
 
-    ${S3_PING_PROTOCOL}
-    ${DNS_PING_PROTOCOL}
-    <MULTI_PING async_discovery="true"/>
+    <dns.DNS_PING dns_query="${DNS_QUERY_LIST}" />
 
     <MERGE3 min_interval="30000" max_interval="60000" />
     <FD_SOCK start_port="${pf.cluster.failure.detection.bind.port}" bind_addr="${pf.cluster.bind.address}"/>

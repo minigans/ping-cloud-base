@@ -113,6 +113,10 @@
 #                           | and monitoring solution.                           |
 #                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
+# SECONDARY_TENANT_DOMAINS  | The tenant domains of the secondary region in.     | No default.
+#                           | multi-region environments. Only used if            |
+#                           | IS_MULTI_CLUSTER is true.                          |
+#                           |                                                    |
 # CONFIG_REPO_BRANCH        | The branch within this repository for server       | master
 #                           | profiles, i.e. configuration.                      |
 #                           |                                                    |
@@ -220,6 +224,7 @@ log "Initial REGION_NICK_NAME: ${REGION_NICK_NAME}"
 log "Initial PRIMARY_REGION: ${PRIMARY_REGION}"
 log "Initial TENANT_DOMAIN: ${TENANT_DOMAIN}"
 log "Initial PRIMARY_TENANT_DOMAIN: ${PRIMARY_TENANT_DOMAIN}"
+log "Initial SECONDARY_TENANT_DOMAINS: ${SECONDARY_TENANT_DOMAINS}"
 log "Initial GLOBAL_TENANT_DOMAIN: ${GLOBAL_TENANT_DOMAIN}"
 
 log "Initial CONFIG_REPO_BRANCH: ${CONFIG_REPO_BRANCH}"
@@ -251,6 +256,16 @@ export TENANT_DOMAIN="${TENANT_DOMAIN:-us1.poc.ping.cloud}"
 export PRIMARY_TENANT_DOMAIN="${PRIMARY_TENANT_DOMAIN:-${TENANT_DOMAIN}}"
 export GLOBAL_TENANT_DOMAIN="${GLOBAL_TENANT_DOMAIN:-$(echo "${TENANT_DOMAIN}"|sed -e "s/[^.]*.\(.*\)/global.\1/")}"
 
+# Prepend ENVIRONMENT to the secondary domains
+secondary_domains=
+for domain in ${SECONDARY_TENANT_DOMAINS}; do
+  env_domain="${ENVIRONMENT}.${domain}"
+  test -z "${secondary_domains}" &&
+      export secondary_domains="${env_domain}" ||
+      export secondary_domains="${secondary_domains},${env_domain}"
+done
+export SECONDARY_TENANT_DOMAINS="${secondary_domains}"
+
 export CONFIG_REPO_BRANCH="${CONFIG_REPO_BRANCH:-master}"
 export CONFIG_PARENT_DIR="${CONFIG_PARENT_DIR:-aws}"
 
@@ -276,6 +291,7 @@ log "Using REGION_NICK_NAME: ${REGION_NICK_NAME}"
 log "Using PRIMARY_REGION: ${PRIMARY_REGION}"
 log "Using TENANT_DOMAIN: ${TENANT_DOMAIN}"
 log "Using PRIMARY_TENANT_DOMAIN: ${PRIMARY_TENANT_DOMAIN}"
+log "Using SECONDARY_TENANT_DOMAINS: ${SECONDARY_TENANT_DOMAINS}"
 log "Using GLOBAL_TENANT_DOMAIN: ${GLOBAL_TENANT_DOMAIN}"
 
 log "Using CONFIG_REPO_BRANCH: ${CONFIG_REPO_BRANCH}"

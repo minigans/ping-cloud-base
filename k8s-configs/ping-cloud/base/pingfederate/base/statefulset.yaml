@@ -77,7 +77,7 @@ spec:
             name: pingfederate-environment-variables
       containers:
       - name: pingfederate-admin
-        image: pingidentity/pingfederate:2006.1-10.0.4
+        image: pingcloud-docker.jfrog.io/pingidentity/pingfederate:10.2.0-SNAPSHOT
         imagePullPolicy: IfNotPresent
         env:
         - name: OPERATIONAL_MODE
@@ -312,7 +312,7 @@ spec:
             name: pingfederate-environment-variables
       containers:
       - name: pingfederate
-        image: pingidentity/pingfederate:2006.1-10.0.4
+        image: pingcloud-docker.jfrog.io/pingidentity/pingfederate:10.2.0-SNAPSHOT
         imagePullPolicy: IfNotPresent
         env:
         - name: OPERATIONAL_MODE
