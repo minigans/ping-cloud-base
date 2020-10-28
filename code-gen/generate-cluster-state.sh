@@ -339,7 +339,7 @@ add_comment_to_file "${BASE_ENV_VARS}" 'Primary region should have the same valu
 PRIMARY_TENANT_DOMAIN_NO_DOT_SUFFIX="${PRIMARY_TENANT_DOMAIN%.}"
 export_variable_ln "${BASE_ENV_VARS}" PRIMARY_TENANT_DOMAIN "${PRIMARY_TENANT_DOMAIN_NO_DOT_SUFFIX:-${TENANT_DOMAIN}}"
 
-add_comment_to_file "${BASE_ENV_VARS}" 'A comma-separated list of the tenant domain of secondary regions'
+add_comment_to_file "${BASE_ENV_VARS}" 'A comma-separated list of the tenant domains of secondary regions'
 export_variable_ln "${BASE_ENV_VARS}" SECONDARY_TENANT_DOMAINS ""
 
 add_comment_to_file "${BASE_ENV_VARS}" 'Region-independent URL used for DNS failover/routing'
