@@ -233,7 +233,7 @@ function configure_tcp_xml() {
 
   query_list="${PF_CLUSTER_DOMAIN_NAME}"
   if is_multi_cluster; then
-    for domain in ${SECONDARY_TENANT_DOMAINS}; do
+    for domain in $(echo "${SECONDARY_TENANT_DOMAINS}" | tr ',' ' '); do
       query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}.${domain}"
     done
   fi

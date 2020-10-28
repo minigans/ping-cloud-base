@@ -256,9 +256,10 @@ export TENANT_DOMAIN="${TENANT_DOMAIN:-us1.poc.ping.cloud}"
 export PRIMARY_TENANT_DOMAIN="${PRIMARY_TENANT_DOMAIN:-${TENANT_DOMAIN}}"
 export GLOBAL_TENANT_DOMAIN="${GLOBAL_TENANT_DOMAIN:-$(echo "${TENANT_DOMAIN}"|sed -e "s/[^.]*.\(.*\)/global.\1/")}"
 
-# Prepend ENVIRONMENT to the secondary domains
+# Prepend a '-ENVIRONMENT.' prefix to the secondary domains to support multiple
+# concurrent dev environments using the same hosted zone.
 secondary_domains=
-for domain in ${SECONDARY_TENANT_DOMAINS}; do
+for domain in $(echo "${SECONDARY_TENANT_DOMAINS}" | tr ',' ' '); do
   env_domain="${ENVIRONMENT}.${domain}"
   test -z "${secondary_domains}" &&
       export secondary_domains="${env_domain}" ||
