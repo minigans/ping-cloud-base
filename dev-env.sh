@@ -113,7 +113,7 @@
 #                           | and monitoring solution.                           |
 #                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
-# SECONDARY_TENANT_DOMAINS  | The tenant domains of the secondary region in.     | No default.
+# SECONDARY_TENANT_DOMAINS  | The tenant domains of the secondary regions in     | No default.
 #                           | multi-region environments. Only used if            |
 #                           | IS_MULTI_CLUSTER is true.                          |
 #                           |                                                    |
