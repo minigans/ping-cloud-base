@@ -13,7 +13,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: pingfederate-backup
-        image: pingcloud-docker.jfrog.io/pingidentity/pingfederate:10.2.0-SNAPSHOT
+        image: pingcloud-mirror.jfrog.io/pingidentity/pingfederate:2010-10.1.2
         command:
         - /opt/in/backup-archive-data.sh
         envFrom:
