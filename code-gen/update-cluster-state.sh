@@ -42,10 +42,13 @@ popd_quiet() {
 #   ${1} -> The environment variables file.
 ########################################################################################################################
 set_env_vars() {
-  set -a
-  # shellcheck disable=SC1090
-  source "$1"
-  set +a
+  env_file="$1"
+  if test -f "${env_file}"; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$1"
+    set +a
+  fi
 }
 
 ### SCRIPT START ###
@@ -137,7 +140,7 @@ TENANT_CODE_DIR="$(mktemp -d)"
 PRIMARY_REGION_DIR_FILE="$(mktemp)"
 
 for REGION_DIR in ${REGION_DIRS}; do
-  # Perform the code generation in a sub-shell so it doesn't pollute the current shell
+  # Perform the code generation in a sub-shell so it doesn't pollute the current shell with environment variables
   (
     REGION_ENV_VARS="${K8S_CONFIGS_DIR}/${REGION_DIR}/${ENV_VARS_FILE_NAME}"
     ENV_VARS_FILES="$(find "${K8S_CONFIGS_DIR}/${REGION_DIR}" -type f -mindepth 2 -name "${ENV_VARS_FILE_NAME}")"
