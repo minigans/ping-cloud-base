@@ -11,6 +11,9 @@ PRIMARY_REGION=${PRIMARY_REGION}
 # Primary region should have the same value for TENANT_DOMAIN and PRIMARY_TENANT_DOMAIN
 PRIMARY_TENANT_DOMAIN=${PRIMARY_TENANT_DOMAIN}
 
+# A comma-separated list of the tenant domains of secondary regions
+SECONDARY_TENANT_DOMAINS=
+
 # Region-independent URL used for DNS failover/routing
 GLOBAL_TENANT_DOMAIN=${GLOBAL_TENANT_DOMAIN}
 
