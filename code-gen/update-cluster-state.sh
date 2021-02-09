@@ -22,6 +22,7 @@
 ### Global values and utility functions ###
 BASE64_DECODE_OPT="${BASE64_DECODE_OPT:--D}"
 
+CLUSTER_STATE_DIR='cluster-state'
 K8S_CONFIGS_DIR='k8s-configs'
 PROFILES_DIR='profiles'
 BASE_DIR='base'
@@ -946,7 +947,13 @@ for ENV in ${ENVIRONMENTS}; do # ENV loop
         elif test "${DIR_NAME}" = "${REGION_DIR}"; then
           ENV_VARS_TEMPLATE="${NEW_PING_CLOUD_BASE_REPO}/${TEMPLATES_REGION_DIR}/${ENV_VARS_FILE_NAME}"
         else
-          # Ignore the env_vars under ping app-specific directories.
+          # Copy the env_vars under ping app-specific directories as is.
+          app_env_vars_file="$(git ls-files "*/${DIR_NAME}/env_vars" | grep "${REGION_DIR}" | head -1)"
+          if test "${app_env_vars_file}"; then
+            DST_DIR="${TARGET_DIR}/${CLUSTER_STATE_DIR}/${K8S_CONFIGS_DIR}/${NEW_BRANCH}/${REGION_DIR}/${DIR_NAME}"
+            git show "${DEFAULT_CDE_BRANCH}:${app_env_vars_file}" > "${DST_DIR}/${ENV_VARS_FILE}.old"
+          fi
+
           continue
         fi
 
