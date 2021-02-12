@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p14c-bootstrap
+  labels:
+    role: p14c-bootstrap
+spec:
+  replicas: 1
+  template:
+    spec:
+      serviceAccount: p14c-bootstrap-serviceaccount
+      containers:
+      - name: p14c-bootstrap
+        image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-tools/p14c-bootstrap:v1.0.0-pdo-2033-p14c-bootstrap
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        envFrom:
+        - configMapRef:
+            name: pingcloud-p14c-bootstrap-environment-variables
+        ports:
+        - name: http
+          containerPort: 5000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 3

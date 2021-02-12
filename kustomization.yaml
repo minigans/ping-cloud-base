@@ -93,6 +93,19 @@ patchesJson6902:
     group: extensions
     version: v1beta1
     kind: Ingress
+    name: p14c-bootstrap-ingress
+  patch: |-
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: p14c-bootstrap.${TENANT_DOMAIN}
+    - op: replace
+      path: /spec/rules/0/host
+      value: p14c-bootstrap.${TENANT_DOMAIN}
+
+- target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
     name: pingdirectory-http-ingress
   patch: |-
     - op: replace

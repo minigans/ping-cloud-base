@@ -55,6 +55,20 @@ patchesJson6902:
       path: /spec/rules/0/host
       value: metadata${ENVIRONMENT}.${TENANT_DOMAIN}
 
+# p14c-bootstrap ingress
+- target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: p14c-bootstrap-ingress
+  patch: |-
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: p14c-bootstrap${ENVIRONMENT}.${TENANT_DOMAIN}
+    - op: replace
+      path: /spec/rules/0/host
+      value: p14c-bootstrap${ENVIRONMENT}.${TENANT_DOMAIN}
+
 # pingdirectory HTTP
 - target:
     group: extensions

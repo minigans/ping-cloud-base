@@ -62,3 +62,17 @@ patchesJson6902:
     - op: replace
       path: /spec/rules/0/host
       value: metadata.${DNS_ZONE}
+
+# pingcloud-p14c-bootstrap ingress
+- target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: p14c-bootstrap-ingress
+  patch: |
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: p14c-bootstrap.${DNS_ZONE}
+    - op: replace
+      path: /spec/rules/0/host
+      value: p14c-bootstrap.${DNS_ZONE}
