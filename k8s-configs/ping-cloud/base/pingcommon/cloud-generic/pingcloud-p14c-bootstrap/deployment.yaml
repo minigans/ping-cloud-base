@@ -5,8 +5,17 @@ metadata:
   labels:
     role: p14c-bootstrap
 spec:
+  selector:
+    matchLabels:
+      role: p14c-bootstrap
   replicas: 1
   template:
+    metadata:
+      name: p14c-bootstrap
+      labels:
+        role: p14c-bootstrap
+      annotations:
+        lastUpdateReason: "NA"
     spec:
       serviceAccount: p14c-bootstrap-serviceaccount
       containers:
@@ -27,11 +36,11 @@ spec:
           containerPort: 5000
         resources:
           requests:
-            memory: "256Mi"
+            memory: "512Mi"
             cpu: "250m"
           limits:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "250m"
         readinessProbe:
           httpGet:
             path: /health
