@@ -11,8 +11,20 @@ PRIMARY_REGION=${PRIMARY_REGION}
 # Primary region should have the same value for TENANT_DOMAIN and PRIMARY_TENANT_DOMAIN
 PRIMARY_TENANT_DOMAIN=${PRIMARY_TENANT_DOMAIN}
 
-# A comma-separated list of the tenant domains of secondary regions
-SECONDARY_TENANT_DOMAINS=
+# A comma-separated list of the tenant domain suffixes of secondary regions:
+#   - Do NOT include the primary tenant domain in the list
+#   - Do NOT include the CDE prefix in the domain name
+#
+# For example, if the primary domain is "tuna.us1.ping-preview.cloud", then set it
+# to "tuna.eu1.ping-preview.cloud,tuna.au1.ping-preview.cloud" to specify secondary
+# clusters in regions eu1 and au1.
+#
+# NOTES:
+#   - It is recommended to set this apriori even before the secondary regions are
+#     created to prevent pod rollouts. DNS_PING will simply ignore unreachable domains.
+#   - If it is not set beforehand, then all servers in the PF cluster (admin and engines)
+#     must be re-rolled to pick up the change.
+SECONDARY_TENANT_DOMAINS="${SECONDARY_TENANT_DOMAINS}"
 
 # Region-independent URL used for DNS failover/routing
 GLOBAL_TENANT_DOMAIN=${GLOBAL_TENANT_DOMAIN}

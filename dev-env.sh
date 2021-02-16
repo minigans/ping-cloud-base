@@ -113,9 +113,10 @@
 #                           | and monitoring solution.                           |
 #                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
-# SECONDARY_TENANT_DOMAINS  | The tenant domains of the secondary regions in     | No default.
-#                           | multi-region environments. Only used if            |
-#                           | IS_MULTI_CLUSTER is true.                          |
+# SECONDARY_TENANT_DOMAINS  | A comma-separated list of tenant domains of the    | No default.
+#                           | secondary regions in multi-region environments,    |
+#                           | e.g. "mini.ping-demo.com,mini.ping-oasis.com".     |
+#                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
 # CONFIG_REPO_BRANCH        | The branch within this repository for server       | master
 #                           | profiles, i.e. configuration.                      |
@@ -141,11 +142,6 @@
 #                           | backups are periodically captured and sent to this |
 #                           | URL. For AWS S3 buckets, it must be an S3 URL,     |
 #                           | e.g. s3://backups.                                 |
-#                           |                                                    |
-# CLUSTER_BUCKET_NAME       | The name of the S3 bucket where clustering         | The string "unused". This is a
-#                           | information is stored for all stateful Ping apps.  | required property for multi-cluster
-#                           |                                                    | deployments, which is currently only
-#                           |                                                    | supported on AWS.
 #                           |                                                    |
 # DEPLOY_FILE               | The name of the file where the final deployment    | /tmp/deploy.yaml
 #                           | spec is saved before applying it.                  |
@@ -204,13 +200,6 @@ if test ${HAS_REQUIRED_TOOLS} -ne 0 || test ${HAS_REQUIRED_VARS} -ne 0; then
 fi
 
 test -z "${IS_MULTI_CLUSTER}" && IS_MULTI_CLUSTER=false
-if "${IS_MULTI_CLUSTER}"; then
-  check_env_vars "CLUSTER_BUCKET_NAME"
-  if test $? -ne 0; then
-    popd > /dev/null 2>&1
-    exit 1
-  fi
-fi
 
 # Show initial values for relevant environment variables.
 log "Initial TENANT_NAME: ${TENANT_NAME}"
@@ -218,7 +207,6 @@ log "Initial ENVIRONMENT: ${ENVIRONMENT}"
 
 log "Initial IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
 log "Initial TOPOLOGY_DESCRIPTOR_FILE: ${TOPOLOGY_DESCRIPTOR_FILE}"
-log "Initial CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 log "Initial REGION: ${REGION}"
 log "Initial REGION_NICK_NAME: ${REGION_NICK_NAME}"
 log "Initial PRIMARY_REGION: ${PRIMARY_REGION}"
@@ -246,7 +234,6 @@ export TENANT_NAME="${TENANT_NAME:-PingPOC}"
 export ENVIRONMENT=-"${ENVIRONMENT:-${USER}}"
 
 export IS_MULTI_CLUSTER="${IS_MULTI_CLUSTER}"
-export CLUSTER_BUCKET_NAME="${CLUSTER_BUCKET_NAME}"
 
 export REGION="${REGION:-us-east-2}"
 export REGION_NICK_NAME="${REGION_NICK_NAME:-${REGION}}"
@@ -276,7 +263,6 @@ log "Using ENVIRONMENT: ${ENVIRONMENT_NO_HYPHEN_PREFIX}"
 
 log "Using IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
 log "Using TOPOLOGY_DESCRIPTOR_FILE: ${TOPOLOGY_DESCRIPTOR_FILE}"
-log "Using CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 log "Using REGION: ${REGION}"
 log "Using REGION_NICK_NAME: ${REGION_NICK_NAME}"
 log "Using PRIMARY_REGION: ${PRIMARY_REGION}"
@@ -355,7 +341,6 @@ if test "${dryrun}" = 'false'; then
 export CLUSTER_NAME=${TENANT_NAME}
 
 export IS_MULTI_CLUSTER=${IS_MULTI_CLUSTER}
-export CLUSTER_BUCKET_NAME=${CLUSTER_BUCKET_NAME}
 
 export REGION=${REGION}
 export REGION_NICK_NAME=${REGION_NICK_NAME}

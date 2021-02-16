@@ -234,11 +234,14 @@ function configure_tcp_xml() {
   query_list="${PF_CLUSTER_DOMAIN_NAME}"
   if is_multi_cluster; then
     for domain in $(echo "${SECONDARY_TENANT_DOMAINS}" | tr ',' ' '); do
-      # We prefix the ENVIRONMENT environment variable to the domain name in Beluga Dev/CI-CD environments.
-      test "${ENVIRONMENT}" &&
-          domain_suffix="${ENVIRONMENT}.${domain}" ||
-          domain_suffix="${domain}"
-      query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}${domain_suffix}"
+      # Handle both Beluga Dev/CI-CD environments and Ping Cloud CDE environments:
+      # - We prefix the ENVIRONMENT environment variable (set through BELUGA_ENV_NAME) to the domain name in Beluga
+      #   Dev/CI-CD environments.
+      # - We prefix the ENV environment variable followed by a dash to the domain name in Ping Cloud CDEs.
+      test "${BELUGA_ENV_NAME}" &&
+          host_suffix="${BELUGA_ENV_NAME}.${domain}" ||
+          host_suffix=".${ENV}-${domain}"
+      query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}${host_suffix}"
     done
   fi
 
