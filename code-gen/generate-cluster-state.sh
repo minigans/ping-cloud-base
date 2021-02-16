@@ -688,6 +688,12 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
     sed -i.bak 's/^\(.*remove-from-secondary-patch.yaml\)$/# \1/' "${PRIMARY_PING_KUST_FILE}"
     rm -f "${PRIMARY_PING_KUST_FILE}.bak"
   fi
+
+  if "${IS_BELUGA_ENV}"; then
+    BASE_ENV_VARS="${ENV_DIR}/base/env_vars"
+    echo >> "${BASE_ENV_VARS}"
+    echo "IS_BELUGA_ENV=true" >> "${BASE_ENV_VARS}"
+  fi
 )
 done
 

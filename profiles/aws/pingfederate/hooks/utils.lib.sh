@@ -233,15 +233,25 @@ function configure_tcp_xml() {
 
   query_list="${PF_CLUSTER_DOMAIN_NAME}"
   if is_multi_cluster; then
-    for domain in $(echo "${SECONDARY_TENANT_DOMAINS}" | tr ',' ' '); do
-      # Handle both Beluga Dev/CI-CD environments and Ping Cloud CDE environments:
-      # - We prefix the ENVIRONMENT environment variable (set through BELUGA_ENV_NAME) to the domain name in Beluga
-      #   Dev/CI-CD environments.
-      # - We prefix the ENV environment variable followed by a dash to the domain name in Ping Cloud CDEs.
-      test "${BELUGA_ENV_NAME}" &&
-          host_suffix="${BELUGA_ENV_NAME}.${domain}" ||
-          host_suffix=".${ENV}-${domain}"
-      query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}${host_suffix}"
+    # Sanitize SECONDARY_TENANT_DOMAINS by removing all single/double quotes and replacing comma with space.
+    secondary_domains="$(echo "${SECONDARY_TENANT_DOMAINS}" | tr -d '"' | tr -d "'" | tr ',' ' ')"
+
+    # Handle both Beluga Dev/CI-CD environments and Ping Cloud CDE environments:
+    #   - Beluga Dev/CI-CD environments:
+    #       - If an environment name is provided through the BELUGA_ENV_NAME variable, usually ${USER} or ${GIT_BRANCH},
+    #         then prepend that to the domain name.
+    #       - If no environment is provided through the BELUGA_ENV_NAME variable, then use the domain name as is.
+    #   - Ping Cloud CDEs:
+    #       - Prepend the CDE name provided through the ENV environment variable followed by a dash to the domain name.
+    for domain in ${secondary_domains}; do
+      if "${IS_BELUGA_ENV:-false}"; then
+        test "${BELUGA_ENV_NAME}" &&
+            dns_suffix="${BELUGA_ENV_NAME}.${domain}" ||
+            dns_suffix="${domain}"
+      else
+        dns_suffix=".${ENV}-${domain}"
+      fi
+      query_list="${query_list},${PF_CLUSTER_PRIVATE_HOSTNAME}${dns_suffix}"
     done
   fi
 
