@@ -19,8 +19,15 @@ export SHUNIT_PATH="${PROJECT_DIR}/ci-scripts/test/shunit/shunit2-2.1.x/shunit2"
 execute_test_scripts() {
 
   local test_directory="${1}"
-  local regex="${2}"
+  local hooks_dir="${2}"
+  local templates_dir="${3}"
+  local regex="${4}"
   local test_file_failures=0
+
+  # Provide env vars pointing to the current
+  # scripts and templates being tested
+  export HOOKS_DIR="${hooks_dir}"
+  export TEMPLATES_DIR="${templates_dir}"
 
   for SCRIPT in $(find ${test_directory} -print | grep -E ${regex} | sort); do
     log "Running unit test: ${SCRIPT}"
@@ -31,9 +38,11 @@ execute_test_scripts() {
     echo
 
     # Calculate and track the combined results of all tests
-    # using an OR operation.
-    test_file_failures=$((${all_tests_passed} + ${test_result}))
+    test_file_failures=$((${test_file_failures} + ${test_result}))
   done
+
+  unset HOOKS_DIR
+  unset TEMPLATES_DIR
 
   return ${test_file_failures}
 }
@@ -46,7 +55,10 @@ log "Running test scripts..."
 # To be found by the regex, scripts must be:
 # - under the ci-script-tests, common or ping-prefixed directories (no matter how deep)
 # - must be prefixed with at least a 2-digit number to be found and must end with .sh
-execute_test_scripts "${SCRIPT_HOME}/${TEST_DIR}" '(ci-script-tests|common|ping[a-zA-Z-]*)\/.*\/[0-9][0-9]+.*\.sh'
+execute_test_scripts "${SCRIPT_HOME}/${TEST_DIR}" \
+                     "${PROJECT_DIR}/profiles/aws/${TEST_DIR}/hooks" \
+                     "${PROJECT_DIR}/profiles/aws/${TEST_DIR}/templates" \
+                     '(ci-script-tests|common|ping[a-zA-Z-]*)\/.*\/[0-9][0-9]+.*\.sh'
 exit_code=$?
 
 NO_COLOR='\033[0m' # No Color

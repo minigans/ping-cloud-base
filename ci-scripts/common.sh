@@ -8,8 +8,19 @@ test "${VERBOSE}" && set -x
 
 # Override environment variables with optional file supplied from the outside
 ENV_VARS_FILE="${1}"
+
+# Integration tests to skip.  Unit tests cannot be skipped.
 SKIP_TESTS="${SKIP_TESTS:-pingdirectory/03-backup-restore.sh \
-  chaos/01-delete-pa-admin-pod.sh}"
+  pingfederate/02-csd-upload-test.sh \
+  pingaccess-was/09-csd-upload-test.sh \
+  pingaccess/09-csd-upload-test.sh
+  pingaccess/05-test-cloudwatch-logs.sh \
+  pingfederate/05-test-cloudwatch-logs.sh \
+  pingdirectory/05-test-cloudwatch-logs.sh \
+  pingaccess/11-heartbeat-endpoint.sh \
+  pingfederate/09-heartbeat-endpoint.sh \
+  pingaccess/08-artifact-test.sh \
+  chaos/01-delete-pa-admin-pod.sh }"
 
 if test -z "${ENV_VARS_FILE}"; then
   echo "Using environment variables based on CI variables"
@@ -62,9 +73,9 @@ export LOG_GROUP_NAME="/aws/containerinsights/${CLUSTER_NAME}/application"
 FQDN=${ENVIRONMENT}.${TENANT_DOMAIN}
 
 # Monitoring
-LOGS_CONSOLE=https://logs-${CLUSTER_NAME_LC}.${TENANT_DOMAIN}/app/kibana
-PROMETHEUS=https://prometheus-${CLUSTER_NAME_LC}.${TENANT_DOMAIN}/graph
-GRAFANA=https://monitoring-${CLUSTER_NAME_LC}.${TENANT_DOMAIN}/login
+LOGS_CONSOLE=https://logs${FQDN}/app/kibana
+PROMETHEUS=https://prometheus${FQDN}
+GRAFANA=https://monitoring${FQDN}
 
 # Pingdirectory
 PINGDIRECTORY_API=https://pingdirectory${FQDN}
@@ -100,6 +111,9 @@ PINGACCESS_WAS_API=https://pingaccess-was-admin${FQDN}/pa-admin-api/v3
 
 # runtime services:
 PINGACCESS_WAS_RUNTIME=https://pingaccess-was${FQDN}
+
+# Pingcloud-metadata service:
+PINGCLOUD_METADATA_API=https://metadata${FQDN}
 
 # Source some utility methods.
 . ${PROJECT_DIR}/utils.sh

@@ -28,10 +28,7 @@ testAgentConfig() {
   # Create a shared secret
   create_shared_secret_response=$(create_shared_secret "${PA_ADMIN_PASSWORD}" "${PINGACCESS_API}" "${agent_shared_secret}")
   return_code=$?
-  assertEquals "Failed to create a shared secret with POST request to: ${PINGACCESS_API} using admin password: ${PA_ADMIN_PASSWORD}" 0 ${return_code}
-  if [ ${return_code} -ne 0 ]; then
-    echo "${create_shared_secret_response}"
-  fi
+  assertEquals "Failed to create a shared secret with POST request to: ${PINGACCESS_API} using admin password: ${PA_ADMIN_PASSWORD}.  The response was ${create_shared_secret_response}" 0 ${return_code}
 
   shared_secret_id=$(parse_value_from_response "${create_shared_secret_response}" 'id')
   assertEquals "Failed to parse the id from the shared secret response: ${create_shared_secret_response}" 0 $?
@@ -125,36 +122,20 @@ testAgentConfig() {
 
   log "Request sent to the agent port on pingaccess-0 was successful"
 
-  ### Use kubectl exec to connect to the ping-admin-0 instance and verify
-  ### the agent port on pingaccess-1 is listening
-  send_request_to_agent_port "${agent_name}" "${agent_shared_secret}" 'pingaccess-1' "${NAMESPACE}"
-  assertEquals "Failed to send a request to the pingaccess-1 runtime agent port" 0 $?
-
-  log "Request sent to the agent port on pingaccess-1 was successful"
-
   # Remove the app
   delete_application_response=$(delete_application "${PA_ADMIN_PASSWORD}" "${PINGACCESS_API}" "${application_id}")
   return_code=$?
-  assertEquals "Failed to remove the application app1 with the application_id: ${application_id}." 0 ${return_code}
-  if [ ${return_code} -ne 0 ]; then
-    echo "${delete_application_response}"
-  fi
+  assertEquals "Failed to remove the application app1 with the application_id: ${application_id}.  The response was: ${delete_application_response}" 0 ${return_code}
 
   # Remove the agent
   delete_agent_response=$(delete_agent "${PA_ADMIN_PASSWORD}" "${PINGACCESS_API}" "${agent_id}")
   return_code=$?
-  assertEquals "Failed to remove the agent with the agent_id: ${agent_id}" 0 ${return_code}
-  if [ ${return_code} -ne 0 ]; then
-    echo "${delete_agent_response}"
-  fi
+  assertEquals "Failed to remove the agent with the agent_id: ${agent_id}.  The response was: ${delete_agent_response}" 0 ${return_code}
 
   # Remove the virtual host
   delete_virtual_host_response=$(delete_virtual_host "${PA_ADMIN_PASSWORD}" "${PINGACCESS_API}" "${virtual_host_id}")
   return_code=$?
-  assertEquals "Failed to remove the virtual host with the virtual_host_id: ${virtual_host_id}" 0 ${return_code}
-  if [ ${return_code} -ne 0 ]; then
-    echo "${delete_virtual_host_response}"
-  fi
+  assertEquals "Failed to remove the virtual host with the virtual_host_id: ${virtual_host_id}.  The response was: ${delete_virtual_host_response}" 0 ${return_code}
 }
 
 tearDown() {

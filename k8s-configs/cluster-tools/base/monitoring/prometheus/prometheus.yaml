@@ -19,7 +19,7 @@ data:
     scrape_configs:
     # Monitor prometheus itself
     - job_name: 'prometheus'
-      scrape_interval: 5s
+      scrape_interval: 10s
       static_configs:
       - targets: ['localhost:9090']
     # Monitor kube-state-metrics
@@ -35,6 +35,72 @@ data:
       - source_labels: [__meta_kubernetes_endpoint_port_name, __meta_kubernetes_service_name]
         action: keep
         regex: metrics;pingdirectory
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+
+    # Discover and monitor PF instances
+    - job_name: 'pf-jmx-exporter'
+      scrape_interval: 10s
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoint_port_name, __meta_kubernetes_service_name]
+        action: keep
+        regex: metrics;pingfederate
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+
+    # Discover and monitor PF instances
+    - job_name: 'pf-heartbeat-exporter'
+      scrape_interval: 10s
+      metrics_path: /
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoint_port_name, __meta_kubernetes_service_name]
+        action: keep
+        regex: pf-heartbeat;pingfederate
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+
+    # Discover and monitor PA instances
+    - job_name: 'pa-jmx-exporter'
+      scrape_interval: 10s
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoint_port_name, __meta_kubernetes_service_name]
+        action: keep
+        regex: metrics;pingaccess
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+
+    # Discover and monitor PA instances
+    - job_name: 'pa-heartbeat-exporter'
+      scrape_interval: 10s
+      metrics_path: /
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoint_port_name, __meta_kubernetes_service_name]
+        action: keep
+        regex: pa-heartbeat;pingaccess
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: instance
