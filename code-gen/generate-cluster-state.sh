@@ -118,6 +118,12 @@
 # PRIMARY_REGION           | In multi-cluster environments, the primary region. | Same as REGION.
 #                          | Only used if IS_MULTI_CLUSTER is true.             |
 #                          |                                                    |
+# CLUSTER_BUCKET_NAME      | The optional name of the S3 bucket where cluster   | No default.
+#                          | information is maintained for PF. Only used if     |
+#                          | IS_MULTI_CLUSTER is true. If provided, PF will be  |
+#                          | configured with NATIVE_S3_PING discovery and will  |
+#                          | precede over DNS_PING, which is always configured. |
+#                          |                                                    |
 # SIZE                     | Size of the environment, which pertains to the     | x-small
 #                          | number of user identities. Legal values are        |
 #                          | x-small, small, medium or large.                   |
@@ -225,6 +231,7 @@ DEFAULT_VARS='${PING_IDENTITY_DEVOPS_USER_BASE64}
 ${PING_IDENTITY_DEVOPS_KEY_BASE64}
 ${SSH_ID_KEY_BASE64}
 ${IS_MULTI_CLUSTER}
+${CLUSTER_BUCKET_NAME}
 ${REGION}
 ${REGION_NICK_NAME}
 ${PRIMARY_REGION}
@@ -362,12 +369,14 @@ echo "Initial TENANT_NAME: ${TENANT_NAME}"
 echo "Initial SIZE: ${SIZE}"
 
 echo "Initial IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
+echo "Initial CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 echo "Initial REGION: ${REGION}"
 echo "Initial REGION_NICK_NAME: ${REGION_NICK_NAME}"
 echo "Initial PRIMARY_REGION: ${PRIMARY_REGION}"
 echo "Initial TENANT_DOMAIN: ${TENANT_DOMAIN}"
 echo "Initial GLOBAL_TENANT_DOMAIN: ${GLOBAL_TENANT_DOMAIN}"
 echo "Initial PRIMARY_TENANT_DOMAIN: ${PRIMARY_TENANT_DOMAIN}"
+echo "Initial SECONDARY_TENANT_DOMAINS: ${SECONDARY_TENANT_DOMAINS}"
 
 echo "Initial CLUSTER_STATE_REPO_URL: ${CLUSTER_STATE_REPO_URL}"
 
@@ -401,6 +410,7 @@ export REGION_NICK_NAME="${REGION_NICK_NAME:-${REGION}}"
 TENANT_DOMAIN_NO_DOT_SUFFIX="${TENANT_DOMAIN%.}"
 export TENANT_DOMAIN="${TENANT_DOMAIN_NO_DOT_SUFFIX}"
 
+export CLUSTER_BUCKET_NAME="${CLUSTER_BUCKET_NAME}"
 export ARTIFACT_REPO_URL="${ARTIFACT_REPO_URL:-unused}"
 
 export LAST_UPDATE_REASON="${LAST_UPDATE_REASON:-NA}"
@@ -450,12 +460,14 @@ echo "Using TENANT_NAME: ${TENANT_NAME}"
 echo "Using SIZE: ${SIZE}"
 
 echo "Using IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
+echo "Using CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 echo "Using REGION: ${REGION}"
 echo "Using REGION_NICK_NAME: ${REGION_NICK_NAME}"
 echo "Using PRIMARY_REGION: ${PRIMARY_REGION}"
 echo "Using TENANT_DOMAIN: ${TENANT_DOMAIN}"
 echo "Using GLOBAL_TENANT_DOMAIN: ${GLOBAL_TENANT_DOMAIN}"
 echo "Using PRIMARY_TENANT_DOMAIN: ${PRIMARY_TENANT_DOMAIN}"
+echo "Using SECONDARY_TENANT_DOMAINS: ${SECONDARY_TENANT_DOMAINS}"
 
 echo "Using CLUSTER_STATE_REPO_URL: ${CLUSTER_STATE_REPO_URL}"
 echo "Using CLUSTER_STATE_REPO_PATH: ${REGION_NICK_NAME}"
