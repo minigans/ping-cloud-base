@@ -78,6 +78,8 @@ beluga_owned_k8s_files="@.flux.yaml \
 # The list of variables to substitute in env_vars.old files.
 # shellcheck disable=SC2016
 ENV_VARS_TO_SUBST='${IS_MULTI_CLUSTER}
+${CLUSTER_BUCKET_NAME}
+${SECONDARY_TENANT_DOMAINS}
 ${REGION}
 ${REGION_NICK_NAME}
 ${PRIMARY_REGION}

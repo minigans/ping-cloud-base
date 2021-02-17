@@ -104,6 +104,12 @@
 #                           | This file will be mounted into the Ping containers |
 #                           | at /opt/staging/topology/descriptor.json.          |
 #                           |                                                    |
+# CLUSTER_BUCKET_NAME       | The optional name of the S3 bucket where cluster   | No default.
+#                           | information is maintained for PF. Only used if     |
+#                           | IS_MULTI_CLUSTER is true. If provided, PF will be  |
+#                           | configured with NATIVE_S3_PING discovery and will  |
+#                           | precede over DNS_PING, which is always configured. |
+#                           |                                                    |
 # PRIMARY_TENANT_DOMAIN     | The tenant's domain in the primary region.         | Same as TENANT_DOMAIN.
 #                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
@@ -206,6 +212,7 @@ log "Initial TENANT_NAME: ${TENANT_NAME}"
 log "Initial ENVIRONMENT: ${ENVIRONMENT}"
 
 log "Initial IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
+log "Initial CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 log "Initial TOPOLOGY_DESCRIPTOR_FILE: ${TOPOLOGY_DESCRIPTOR_FILE}"
 log "Initial REGION: ${REGION}"
 log "Initial REGION_NICK_NAME: ${REGION_NICK_NAME}"
@@ -234,6 +241,7 @@ export TENANT_NAME="${TENANT_NAME:-PingPOC}"
 export ENVIRONMENT=-"${ENVIRONMENT:-${USER}}"
 
 export IS_MULTI_CLUSTER="${IS_MULTI_CLUSTER}"
+export CLUSTER_BUCKET_NAME="${CLUSTER_BUCKET_NAME}"
 
 export REGION="${REGION:-us-east-2}"
 export REGION_NICK_NAME="${REGION_NICK_NAME:-${REGION}}"
@@ -263,6 +271,7 @@ log "Using TENANT_NAME: ${TENANT_NAME}"
 log "Using ENVIRONMENT: ${ENVIRONMENT_NO_HYPHEN_PREFIX}"
 
 log "Using IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
+log "Using CLUSTER_BUCKET_NAME: ${CLUSTER_BUCKET_NAME}"
 log "Using TOPOLOGY_DESCRIPTOR_FILE: ${TOPOLOGY_DESCRIPTOR_FILE}"
 log "Using REGION: ${REGION}"
 log "Using REGION_NICK_NAME: ${REGION_NICK_NAME}"
