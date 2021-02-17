@@ -236,11 +236,11 @@ function configure_tcp_xml() {
 
   if is_multi_cluster; then
     #####################################
-    #         NATIVE_S3_PING          #
+    #         NATIVE_S3_PING            #
     #####################################
 
-    # If a CLUSTER_BUCKET_NAME, then configure NATIVE_S3_PING. It will take precedence over DNS_PING in the JGroups
-    # discovery protocol stack.
+    # If CLUSTER_BUCKET_NAME is set, then configure NATIVE_S3_PING. It will take precedence over DNS_PING in the
+    # JGroups discovery protocol stack.
     if test "${CLUSTER_BUCKET_NAME}"; then
       export S3_PING_PROTOCOL="<org.jgroups.aws.s3.NATIVE_S3_PING \
           region_name=\"${PRIMARY_REGION}\" \
