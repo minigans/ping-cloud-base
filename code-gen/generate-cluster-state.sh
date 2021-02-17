@@ -364,6 +364,14 @@ if test -z "${IS_MULTI_CLUSTER}"; then
   IS_MULTI_CLUSTER=false
 fi
 
+if "${IS_MULTI_CLUSTER}"; then
+  if test ! "${CLUSTER_BUCKET_NAME}" && test ! "${SECONDARY_TENANT_DOMAINS}"; then
+    echo 'In multi-cluster mode, one or both of CLUSTER_BUCKET_NAME and SECONDARY_TENANT_DOMAINS must be set.'
+    popd >/dev/null 2>&1
+    exit 1
+  fi
+fi
+
 # Print out the values provided used for each variable.
 echo "Initial TENANT_NAME: ${TENANT_NAME}"
 echo "Initial SIZE: ${SIZE}"

@@ -206,6 +206,13 @@ if test ${HAS_REQUIRED_TOOLS} -ne 0 || test ${HAS_REQUIRED_VARS} -ne 0; then
 fi
 
 test -z "${IS_MULTI_CLUSTER}" && IS_MULTI_CLUSTER=false
+if "${IS_MULTI_CLUSTER}"; then
+  if test ! "${CLUSTER_BUCKET_NAME}" && test ! "${SECONDARY_TENANT_DOMAINS}"; then
+    echo 'In multi-cluster mode, one or both of CLUSTER_BUCKET_NAME and SECONDARY_TENANT_DOMAINS must be set.'
+    popd > /dev/null 2>&1
+    exit 1
+  fi
+fi
 
 # Show initial values for relevant environment variables.
 log "Initial TENANT_NAME: ${TENANT_NAME}"
