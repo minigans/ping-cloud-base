@@ -104,12 +104,6 @@
 #                           | This file will be mounted into the Ping containers |
 #                           | at /opt/staging/topology/descriptor.json.          |
 #                           |                                                    |
-# CLUSTER_BUCKET_NAME       | The optional name of the S3 bucket where cluster   | No default.
-#                           | information is maintained for PF. Only used if     |
-#                           | IS_MULTI_CLUSTER is true. If provided, PF will be  |
-#                           | configured with NATIVE_S3_PING discovery and will  |
-#                           | precede over DNS_PING, which is always configured. |
-#                           |                                                    |
 # PRIMARY_TENANT_DOMAIN     | The tenant's domain in the primary region.         | Same as TENANT_DOMAIN.
 #                           | Only used if IS_MULTI_CLUSTER is true.             |
 #                           |                                                    |
@@ -148,6 +142,12 @@
 #                           | backups are periodically captured and sent to this |
 #                           | URL. For AWS S3 buckets, it must be an S3 URL,     |
 #                           | e.g. s3://backups.                                 |
+#                           |                                                    |
+# CLUSTER_BUCKET_NAME       | The optional name of the S3 bucket where cluster   | No default.
+#                           | information is maintained for PF. Only used if     |
+#                           | IS_MULTI_CLUSTER is true. If provided, PF will be  |
+#                           | configured with NATIVE_S3_PING discovery and will  |
+#                           | precede over DNS_PING, which is always configured. |
 #                           |                                                    |
 # DEPLOY_FILE               | The name of the file where the final deployment    | /tmp/deploy.yaml
 #                           | spec is saved before applying it.                  |
@@ -361,6 +361,7 @@ export PRIMARY_TENANT_DOMAIN=${PRIMARY_TENANT_DOMAIN}
 export GLOBAL_TENANT_DOMAIN=${GLOBAL_TENANT_DOMAIN}
 
 export ENVIRONMENT=${ENVIRONMENT}
+export BELUGA_ENV_NAME="${BELUGA_ENV_NAME}"
 export NAMESPACE=${NAMESPACE}
 
 export CONFIG_PARENT_DIR=aws
