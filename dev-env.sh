@@ -256,6 +256,7 @@ DEPLOY_FILE=${DEPLOY_FILE:-/tmp/deploy.yaml}
 test -z "${K8S_CONTEXT}" && K8S_CONTEXT=$(kubectl config current-context)
 
 ENVIRONMENT_NO_HYPHEN_PREFIX="${ENVIRONMENT#-}"
+export BELUGA_ENV_NAME="${ENVIRONMENT_NO_HYPHEN_PREFIX}"
 
 # Show the values being used for the relevant environment variables.
 log "Using TENANT_NAME: ${TENANT_NAME}"

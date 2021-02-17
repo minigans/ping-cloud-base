@@ -246,8 +246,8 @@ function configure_tcp_xml() {
     for domain in ${secondary_domains}; do
       if "${IS_BELUGA_ENV:-false}"; then
         test "${BELUGA_ENV_NAME}" &&
-            dns_suffix="${BELUGA_ENV_NAME}.${domain}" ||
-            dns_suffix="${domain}"
+            dns_suffix="-${BELUGA_ENV_NAME}.${domain}" ||
+            dns_suffix=".${domain}"
       else
         dns_suffix=".${ENV}-${domain}"
       fi
