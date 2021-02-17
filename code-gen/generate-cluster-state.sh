@@ -90,8 +90,8 @@
 #                          |                                                    | string "global". For example, it will
 #                          |                                                    | default to "global.poc.ping.com" for
 #                          |                                                    | tenant domain "us1.poc.ping.cloud".
-# SECONDARY_TENANT_DOMAINS |                                                    |
-#                          | A comma-separated list of tenant domain suffixes   | No default.
+#                          |                                                    |
+# SECONDARY_TENANT_DOMAINS | A comma-separated list of tenant domain suffixes   | No default.
 #                          | of secondary regions in multi-region environments, |
 #                          | e.g. "xxx.eu1.ping.cloud,xxx.au1.ping.cloud".      |
 #                          | The primary tenant domain suffix must not be in    |
