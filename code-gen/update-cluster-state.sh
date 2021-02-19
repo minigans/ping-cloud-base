@@ -358,7 +358,7 @@ get_min_required_secrets() {
 }
 
 ########################################################################################################################
-# Run a git diff from the source branch to the target branch to determine the list of diff_files that are deleted or renamed
+# Run a git diff from the source branch to the target branch to determine the list of files that are deleted or renamed
 # in the target branch in the provided directory. It handles whitespaces in filenames and addresses PDO-2066.
 #
 # Arguments
