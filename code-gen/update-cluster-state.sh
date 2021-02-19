@@ -365,6 +365,9 @@ get_min_required_secrets() {
 #   $1 -> The source branch.
 #   $2 -> The target branch.
 #   $3 -> The directory to diff.
+#
+# Returns:
+#   The list of deleted and renamed files in the target branch.
 ########################################################################################################################
 git_diff() {
   FROM_BRANCH="$1"
