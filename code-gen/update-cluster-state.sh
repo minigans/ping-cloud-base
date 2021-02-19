@@ -358,6 +358,80 @@ get_min_required_secrets() {
 }
 
 ########################################################################################################################
+# Run a git diff from the source branch to the target branch to determine the list of diff_files that are deleted or renamed
+# in the target branch in the provided directory. It handles whitespaces in filenames and addresses PDO-2066.
+#
+# Arguments
+#   $1 -> The source branch.
+#   $2 -> The target branch.
+#   $3 -> The directory to diff.
+########################################################################################################################
+git_diff() {
+  FROM_BRANCH="$1"
+  TO_BRANCH="$2"
+  DIFF_DIR="$3"
+
+  # Regex for the status of a renamed file in the git output, e.g. R069, R085, R099, R100, etc.
+  regex='^R([0-9]{3})$'
+
+  # The following while-loop handles renamed and deleted files in the "git diff" output:
+  #
+  # 1. A renamed file will contain 3 lines of output - the rename code (e.g. 'R090'), the source file and the target.
+  #    file. We must accept the line immediately after 'R090' (i.e. k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml)
+  #    but reject the line following it (i.e. k8s-configs/base/orig-secrets.yaml):
+  #
+  #       R090
+  #       k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml
+  #       k8s-configs/base/orig-secrets.yaml
+  #
+  # 2. A deleted file will contain 2 lines of output - the delete code (i.e. 'D') and the name of the deleted file. We
+  #    must accept the line immediately after 'D':
+  #
+  #       D
+  #       k8s-configs/base/cluster-tools/known-hosts-config.yaml
+  #
+  diff_files=
+  skip_next_line=false
+
+  while IFS= read -r -d '' line; do
+    # Skip this line because we're processing a renamed file.
+    if "${skip_next_line}"; then
+      skip_next_line=false
+      continue
+    fi
+
+    # Remove the null character (i.e. ^@) added by the '-z' argument of "git diff".
+    sanitized_line="$(printf '%q\n' "${line}")"
+
+    # The file was renamed in the target branch but not deleted.
+    if [[ "${sanitized_line}" =~ ${regex} ]]; then
+      file_deleted=false
+      continue
+
+    # The file was deleted in the target branch.
+    elif [[ "${sanitized_line}" = 'D' ]]; then
+      file_deleted=true
+      continue
+    fi
+
+    # Accumulate the changed files in the return variable.
+    test "${diff_files}" &&
+        diff_files="${diff_files} ${sanitized_line}" ||
+        diff_files="${sanitized_line}"
+
+    # If the file was deleted, then we don't need to skip the line read in the next iteration. But if it was renamed,
+    # then the old and new names will appear in the output one after another, so we must skip the next line.
+    if "${file_deleted}"; then
+      skip_next_line=false
+    else
+      skip_next_line=true
+    fi
+  done < <(git diff -z --diff-filter=D --diff-filter=R --name-status "${FROM_BRANCH}" "${TO_BRANCH}" -- "${DIFF_DIR}")
+
+  echo "${diff_files}"
+}
+
+########################################################################################################################
 # Copy profiles files that were deleted or renamed from a default CDE branch into its new one.
 #
 # Arguments
@@ -370,9 +444,7 @@ handle_changed_profiles() {
   log "Reconciling '${PROFILES_DIR}' diffs between '${DEFAULT_CDE_BRANCH}' and its new branch '${NEW_BRANCH}'"
 
   git checkout --quiet "${NEW_BRANCH}"
-  new_files="$(git diff --diff-filter=R --diff-filter=D \
-      --name-status "${DEFAULT_CDE_BRANCH}" HEAD -- "${PROFILES_DIR}" |
-      awk '{ print $2 }')"
+  new_files="$(git_diff "${DEFAULT_CDE_BRANCH}" HEAD "${PROFILES_DIR}")"
 
   if ! test "${new_files}"; then
     log "No changed '${PROFILES_DIR}' files to copy '${DEFAULT_CDE_BRANCH}' to its new branch '${NEW_BRANCH}'"
@@ -475,7 +547,7 @@ handle_changed_k8s_configs() {
 
   log "Reconciling '${K8S_CONFIGS_DIR}' diffs between '${DEFAULT_CDE_BRANCH}' and its new branch '${NEW_BRANCH}'"
   git checkout --quiet "${NEW_BRANCH}"
-  new_files="$(git diff --diff-filter=D --name-only "${DEFAULT_CDE_BRANCH}" HEAD -- "${K8S_CONFIGS_DIR}")"
+  new_files="$(git_diff "${DEFAULT_CDE_BRANCH}" HEAD "${K8S_CONFIGS_DIR}")"
 
   if ! test "${new_files}"; then
     log "No changed '${K8S_CONFIGS_DIR}' files to copy '${DEFAULT_CDE_BRANCH}' to its new branch '${NEW_BRANCH}'"
