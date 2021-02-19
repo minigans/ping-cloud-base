@@ -374,9 +374,10 @@ git_diff() {
   # Regex for the status of a renamed file in the git output, e.g. R069, R085, R099, R100, etc.
   regex='^R([0-9]{3})$'
 
-  # The following while-loop handles renamed and deleted files in the "git diff" output:
+  # The following while-loop handles renamed and deleted files in the "git diff" output. The following bullets explain
+  # the processing that happens with an example for each case:
   #
-  # 1. A renamed file will contain 3 lines of output - the rename code (e.g. 'R090'), the source file and the target.
+  # 1. A renamed file will contain 3 lines of output - the rename code (e.g. 'R090'), the source file and the target
   #    file. We must accept the line immediately after 'R090' (i.e. k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml)
   #    but reject the line following it (i.e. k8s-configs/base/orig-secrets.yaml):
   #
@@ -385,7 +386,7 @@ git_diff() {
   #       k8s-configs/base/orig-secrets.yaml
   #
   # 2. A deleted file will contain 2 lines of output - the delete code (i.e. 'D') and the name of the deleted file. We
-  #    must accept the line immediately after 'D':
+  #    must accept the line immediately after 'D' (i.e. k8s-configs/base/cluster-tools/known-hosts-config.yaml):
   #
   #       D
   #       k8s-configs/base/cluster-tools/known-hosts-config.yaml
@@ -400,7 +401,7 @@ git_diff() {
       continue
     fi
 
-    # Remove the null character (i.e. ^@) added by the '-z' argument of "git diff".
+    # Remove the null character delimiter (i.e. ^@) added by the '-z' argument of "git diff".
     sanitized_line="$(printf '%q\n' "${line}")"
 
     # The file was renamed in the target branch but not deleted.
