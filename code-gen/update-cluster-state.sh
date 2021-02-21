@@ -358,27 +358,27 @@ get_min_required_secrets() {
 }
 
 ########################################################################################################################
-# Run a git diff from the source branch to the target branch to determine the list of files that are deleted or renamed
-# in the target branch in the provided directory. It handles whitespaces in filenames and addresses PDO-2066.
+# Run a git diff from a source branch to a destination branch to determine the list of files that are deleted or renamed
+# in the destination branch for a particular directory. It handles whitespaces in filenames and addresses PDO-2066.
 #
 # Arguments
 #   $1 -> The source branch.
-#   $2 -> The target branch.
+#   $2 -> The destination branch.
 #   $3 -> The directory to diff.
 #
 # Returns:
-#   The list of deleted and renamed files in the target branch.
+#   The list of deleted and renamed files in the destination branch.
 ########################################################################################################################
 git_diff() {
-  FROM_BRANCH="$1"
-  TO_BRANCH="$2"
-  DIFF_DIR="$3"
+  src_branch="$1"
+  dst_branch="$2"
+  diff_dir="$3"
 
   # Regex for the status of a renamed file in the git output, e.g. R069, R085, R099, R100, etc.
-  regex='^R([0-9]{3})$'
+  file_renamed_regex='^R([0-9]{3})$'
 
-  # The following while-loop handles renamed and deleted files in the "git diff" output. The following bullets explain
-  # the processing that happens with an example for each case:
+  # The following while-loop handles renamed and deleted files in the "git diff" output. Here's an explanation for the
+  # processing that happens with an example for each case:
   #
   # 1. A renamed file will contain 3 lines of output - the rename code (e.g. 'R090'), the source file and the target
   #    file. We must accept the line immediately after 'R090' (i.e. k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml)
@@ -408,7 +408,7 @@ git_diff() {
     sanitized_line="$(printf '%q\n' "${line}")"
 
     # The file was renamed in the target branch but not deleted.
-    if [[ "${sanitized_line}" =~ ${regex} ]]; then
+    if [[ "${sanitized_line}" =~ ${file_renamed_regex} ]]; then
       file_deleted=false
       continue
 
@@ -430,7 +430,7 @@ git_diff() {
     else
       skip_next_line=true
     fi
-  done < <(git diff -z --diff-filter=D --diff-filter=R --name-status "${FROM_BRANCH}" "${TO_BRANCH}" -- "${DIFF_DIR}")
+  done < <(git diff -z --diff-filter=D --diff-filter=R --name-status "${src_branch}" "${dst_branch}" -- "${diff_dir}")
 
   echo "${diff_files}"
 }
