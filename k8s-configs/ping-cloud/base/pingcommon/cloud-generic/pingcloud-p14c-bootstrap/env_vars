@@ -1,0 +1,3 @@
+REGION=us-west-2
+
+MY_PING_METADATA_QUEUE_NAME=platform_event_queue.fifo

@@ -22,6 +22,7 @@ spec:
       - name: p14c-bootstrap
         image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-tools/p14c-bootstrap:v1.0.0-pdo-2033-p14c-bootstrap
         # FIXME: remove after development is done
+        command: [ '/bin/sh', '-c', 'sleep 600' ]
         imagePullPolicy: Always
         env:
         - name: NAMESPACE
@@ -31,9 +32,6 @@ spec:
         envFrom:
         - configMapRef:
             name: pingcloud-p14c-bootstrap-environment-variables
-        ports:
-        - name: http
-          containerPort: 5000
         resources:
           requests:
             memory: "512Mi"
@@ -41,15 +39,3 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "250m"
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: http
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: http
-          initialDelaySeconds: 3
-          periodSeconds: 3

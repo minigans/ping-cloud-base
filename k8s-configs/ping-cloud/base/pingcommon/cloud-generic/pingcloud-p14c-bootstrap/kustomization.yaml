@@ -11,9 +11,9 @@ generatorOptions:
 
 configMapGenerator:
 - name: pingcloud-p14c-bootstrap-environment-variables
+  envs:
+  - env_vars
 
 resources:
 - rbac.yaml
 - deployment.yaml
-- service.yaml
-- ingress.yaml
