@@ -345,17 +345,16 @@ get_min_required_secrets() {
     if ! test -s "${ID_RSA_FILE}"; then
       log "SSH key not found in ${ID_RSA_FILE}"
       ALL_MIN_SECRETS_FOUND=false
+      ID_RSA_FILE=
     fi
   fi
 
-  if test -z "${PING_IDENTITY_DEVOPS_USER}" ||
-     test -z "${PING_IDENTITY_DEVOPS_KEY}" ||
-     test -z "${ID_RSA_FILE}"; then
+  if test -z "${PING_IDENTITY_DEVOPS_USER}" || test -z "${PING_IDENTITY_DEVOPS_KEY}"; then
+    ALL_MIN_SECRETS_FOUND=false
+
     # Default the dev ops user and key to fake values, if not found in secrets.yaml.
     PING_IDENTITY_DEVOPS_USER="${PING_CLOUD_DEFAULT_DEVOPS_USER}"
     PING_IDENTITY_DEVOPS_KEY='2FederateM0re'
-
-    ALL_MIN_SECRETS_FOUND=false
   fi
 
   log "Using PING_IDENTITY_DEVOPS_USER -> ${PING_IDENTITY_DEVOPS_USER}"
