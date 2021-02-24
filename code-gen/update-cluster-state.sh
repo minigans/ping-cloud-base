@@ -346,12 +346,16 @@ get_min_required_secrets() {
       log "SSH key not found in ${ID_RSA_FILE}"
       ALL_MIN_SECRETS_FOUND=false
     fi
-  else
-    ALL_MIN_SECRETS_FOUND=false
+  fi
 
+  if test -z "${PING_IDENTITY_DEVOPS_USER}" ||
+     test -z "${PING_IDENTITY_DEVOPS_KEY}" ||
+     test -z "${ID_RSA_FILE}"; then
     # Default the dev ops user and key to fake values, if not found in secrets.yaml.
     PING_IDENTITY_DEVOPS_USER="${PING_CLOUD_DEFAULT_DEVOPS_USER}"
     PING_IDENTITY_DEVOPS_KEY='2FederateM0re'
+
+    ALL_MIN_SECRETS_FOUND=false
   fi
 
   log "Using PING_IDENTITY_DEVOPS_USER -> ${PING_IDENTITY_DEVOPS_USER}"
@@ -972,7 +976,7 @@ for ENV in ${ENVIRONMENTS}; do # ENV loop
         # If resetting to default, then use defaults for these variables instead of migrating them.
         if "${RESET_TO_DEFAULT}"; then
           log "Resetting variables to the default or out-of-the-box values per request"
-          unset KUSTOMIZE_BASE LETS_ENCRYPT_SERVER
+          unset LETS_ENCRYPT_SERVER
         fi
 
         export PING_IDENTITY_DEVOPS_KEY="${PING_IDENTITY_DEVOPS_KEY}"
