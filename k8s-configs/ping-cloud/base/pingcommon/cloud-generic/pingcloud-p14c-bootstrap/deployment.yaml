@@ -22,7 +22,6 @@ spec:
       - name: p14c-bootstrap
         image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-tools/p14c-bootstrap:v1.0.0-pdo-2033-p14c-bootstrap
         # FIXME: remove after development is done
-        command: [ '/bin/sh', '-c', 'sleep 600' ]
         imagePullPolicy: Always
         env:
         - name: NAMESPACE
