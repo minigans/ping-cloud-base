@@ -22,3 +22,4 @@ resources:
 - secret.yaml
 - configmap.yaml
 - pingcloud-metadata
+- p14c-oauth-service

@@ -79,6 +79,7 @@ beluga_owned_k8s_files="@.flux.yaml \
 # shellcheck disable=SC2016
 ENV_VARS_TO_SUBST='${IS_MULTI_CLUSTER}
 ${CLUSTER_BUCKET_NAME}
+${SECONDARY_TENANT_DOMAINS}
 ${REGION}
 ${REGION_NICK_NAME}
 ${PRIMARY_REGION}
@@ -325,6 +326,7 @@ get_min_required_secrets() {
   fi
 
   # If secrets.yaml has contents, then attempt to retrieve each required secret.
+  ALL_MIN_SECRETS_FOUND=false
   if test -s "${ping_cloud_secrets_yaml}"; then
     ALL_MIN_SECRETS_FOUND=true
 
@@ -345,8 +347,11 @@ get_min_required_secrets() {
     if ! test -s "${ID_RSA_FILE}"; then
       log "SSH key not found in ${ID_RSA_FILE}"
       ALL_MIN_SECRETS_FOUND=false
+      ID_RSA_FILE=
     fi
-  else
+  fi
+
+  if test -z "${PING_IDENTITY_DEVOPS_USER}" || test -z "${PING_IDENTITY_DEVOPS_KEY}"; then
     ALL_MIN_SECRETS_FOUND=false
 
     # Default the dev ops user and key to fake values, if not found in secrets.yaml.
@@ -355,6 +360,84 @@ get_min_required_secrets() {
   fi
 
   log "Using PING_IDENTITY_DEVOPS_USER -> ${PING_IDENTITY_DEVOPS_USER}"
+}
+
+########################################################################################################################
+# Run a git diff from a source branch to a destination branch to determine the list of files that are deleted or renamed
+# in the destination branch for a particular directory. It handles whitespaces in filenames and addresses PDO-2066.
+#
+# Arguments
+#   $1 -> The source branch.
+#   $2 -> The destination branch.
+#   $3 -> The directory to diff.
+#
+# Returns:
+#   The list of deleted and renamed files in the destination branch.
+########################################################################################################################
+git_diff() {
+  src_branch="$1"
+  dst_branch="$2"
+  diff_dir="$3"
+
+  # Regex for the status of a renamed file in the git output, e.g. R069, R085, R099, R100, etc.
+  file_renamed_regex='^R([0-9]{3})$'
+
+  # The following while-loop handles renamed and deleted files in the "git diff" output. Here's an explanation for the
+  # processing that happens with an example for each case:
+  #
+  # 1. A renamed file will contain 3 lines of output - the rename code (e.g. 'R090'), the source file and the target
+  #    file. We must accept the line immediately after 'R090' (i.e. k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml)
+  #    but reject the line following it (i.e. k8s-configs/base/orig-secrets.yaml):
+  #
+  #       R090
+  #       k8s-configs/us-east-2/ping-cloud/orig-secrets.yaml
+  #       k8s-configs/base/orig-secrets.yaml
+  #
+  # 2. A deleted file will contain 2 lines of output - the delete code (i.e. 'D') and the name of the deleted file. We
+  #    must accept the line immediately after 'D' (i.e. k8s-configs/base/cluster-tools/known-hosts-config.yaml):
+  #
+  #       D
+  #       k8s-configs/base/cluster-tools/known-hosts-config.yaml
+  #
+  diff_files=
+  skip_next_line=false
+
+  while IFS= read -r -d '' line; do
+    # Skip this line because we're processing a renamed file.
+    if "${skip_next_line}"; then
+      skip_next_line=false
+      continue
+    fi
+
+    # Remove the null character delimiter (i.e. ^@) added by the '-z' argument of "git diff".
+    sanitized_line="$(printf '%q\n' "${line}")"
+
+    # The file was renamed in the target branch but not deleted.
+    if [[ "${sanitized_line}" =~ ${file_renamed_regex} ]]; then
+      file_deleted=false
+      continue
+
+    # The file was deleted in the target branch.
+    elif [[ "${sanitized_line}" = 'D' ]]; then
+      file_deleted=true
+      continue
+    fi
+
+    # Accumulate the changed files in the return variable.
+    test "${diff_files}" &&
+        diff_files="${diff_files} ${sanitized_line}" ||
+        diff_files="${sanitized_line}"
+
+    # If the file was deleted, then we don't need to skip the line read in the next iteration. But if it was renamed,
+    # then the old and new names will appear in the output one after another, so we must skip the next line.
+    if "${file_deleted}"; then
+      skip_next_line=false
+    else
+      skip_next_line=true
+    fi
+  done < <(git diff -z --diff-filter=D --diff-filter=R --name-status "${src_branch}" "${dst_branch}" -- "${diff_dir}")
+
+  echo "${diff_files}"
 }
 
 ########################################################################################################################
@@ -370,9 +453,7 @@ handle_changed_profiles() {
   log "Reconciling '${PROFILES_DIR}' diffs between '${DEFAULT_CDE_BRANCH}' and its new branch '${NEW_BRANCH}'"
 
   git checkout --quiet "${NEW_BRANCH}"
-  new_files="$(git diff --diff-filter=R --diff-filter=D \
-      --name-status "${DEFAULT_CDE_BRANCH}" HEAD -- "${PROFILES_DIR}" |
-      awk '{ print $2 }')"
+  new_files="$(git_diff "${DEFAULT_CDE_BRANCH}" HEAD "${PROFILES_DIR}")"
 
   if ! test "${new_files}"; then
     log "No changed '${PROFILES_DIR}' files to copy '${DEFAULT_CDE_BRANCH}' to its new branch '${NEW_BRANCH}'"
@@ -475,7 +556,7 @@ handle_changed_k8s_configs() {
 
   log "Reconciling '${K8S_CONFIGS_DIR}' diffs between '${DEFAULT_CDE_BRANCH}' and its new branch '${NEW_BRANCH}'"
   git checkout --quiet "${NEW_BRANCH}"
-  new_files="$(git diff --diff-filter=D --name-only "${DEFAULT_CDE_BRANCH}" HEAD -- "${K8S_CONFIGS_DIR}")"
+  new_files="$(git_diff "${DEFAULT_CDE_BRANCH}" HEAD "${K8S_CONFIGS_DIR}")"
 
   if ! test "${new_files}"; then
     log "No changed '${K8S_CONFIGS_DIR}' files to copy '${DEFAULT_CDE_BRANCH}' to its new branch '${NEW_BRANCH}'"
@@ -843,13 +924,12 @@ get_min_required_secrets
 #   - Generate code for all its regions
 #   - Push code for all its regions into new branches
 for ENV in ${ENVIRONMENTS}; do # ENV loop
-  log "Updating branch '${NEW_BRANCH}' for CDE '${ENV}'"
-
   test "${ENV}" = 'prod' &&
       DEFAULT_CDE_BRANCH='master' ||
       DEFAULT_CDE_BRANCH="${ENV}"
 
   NEW_BRANCH="${NEW_VERSION}-${DEFAULT_CDE_BRANCH}"
+  log "Updating branch '${NEW_BRANCH}' for CDE '${ENV}'"
 
   log "Switching to branch ${DEFAULT_CDE_BRANCH} to determine deployed regions"
   git checkout --quiet "${DEFAULT_CDE_BRANCH}"
@@ -897,7 +977,7 @@ for ENV in ${ENVIRONMENTS}; do # ENV loop
         # If resetting to default, then use defaults for these variables instead of migrating them.
         if "${RESET_TO_DEFAULT}"; then
           log "Resetting variables to the default or out-of-the-box values per request"
-          unset KUSTOMIZE_BASE LETS_ENCRYPT_SERVER
+          unset LETS_ENCRYPT_SERVER
         fi
 
         export PING_IDENTITY_DEVOPS_KEY="${PING_IDENTITY_DEVOPS_KEY}"
