@@ -194,7 +194,7 @@
 #                        | enable IRSA (IAM Role for Service Accounts).       |
 #                        |                                                    |
 # EVENT_QUEUE_NAME       | The name of the queue that may be used to notify   | platform_event_queue.fifo
-#                        | PingCloud applications of platform events.  This   |
+#                        | PingCloud applications of platform events. This    |
 #                        | is currently only used if the orchestrator for     |
 #                        | PingCloud environments is MyPing.                  |
 ########################################################################################################################
